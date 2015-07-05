@@ -1,7 +1,8 @@
 import urllib2
 import json
 import pickle
-
+import os.path
+script_dirpath = os.path.dirname(os.path.join(os.getcwd(), __file__))
 
 
 
@@ -23,14 +24,14 @@ newvalues=set(rivers)
 oldvalues=set()
 oldvaluelist = []
 try:
-    with open('scratch', 'rb') as f:
+    with open(script_dirpath+'/scratch', 'rb') as f:
         oldvaluelist = (pickle.load(f))
 except Exception:
     pass
 oldvalues = set(oldvaluelist)
 
 
-with open('scratch', 'wb') as f:
+with open(script_dirpath+'/scratch', 'wb') as f:
     pickle.dump(rivers, f)
 
 
