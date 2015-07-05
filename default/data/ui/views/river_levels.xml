@@ -1,0 +1,109 @@
+<form>
+  <label>River Levels</label>
+  <fieldset submitButton="false">
+    <input type="time" token="time">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="town" searchWhenChanged="true">
+      <label>Town</label>
+      <search>
+        <query>|inputlookup rivers | dedup town | search label=*</query>
+      </search>
+      <fieldForLabel>town</fieldForLabel>
+      <fieldForValue>town</fieldForValue>
+      <choice value="*">ALL</choice>
+    </input>
+    <input type="dropdown" token="river" searchWhenChanged="true">
+      <label>River</label>
+      <search>
+        <query>|inputlookup rivers |search town="$town$"</query>
+        <earliest>0</earliest>
+      </search>
+      <fieldForLabel>label</fieldForLabel>
+      <fieldForValue>station</fieldForValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>River Level Change in last 24 Hours</title>
+      <single>
+        <search>
+          <query>sourcetype=riverlevels station="$river$" | stats avg(value) as level by _time | stats first(level) as first last(level) as last | eval diff = last - first | table diff</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="linkView">search</option>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <search>
+          <query>sourcetype=riverlevels station="$river$" | stats latest(typicalRangeHigh) as high latest(typicalRangeLow) as low latest(value) as currentlevel | eval text=case(currentlevel&gt;=high,"River Higher then Normal Levels",currentlevel&lt;high,"River is within normal levels") | table text</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="linkView">search</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <search>
+          <query>sourcetype=riverlevels station="$river$"  |timechart avg(typicalRangeHigh) as high  avg(typicalRangeLow) as low  avg(value)  as currentlevel  bins=1000</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.chart.overlayFields">currentlevel</option>
+      </chart>
+    </panel>
+  </row>
+</form>
