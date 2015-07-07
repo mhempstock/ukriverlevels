@@ -1,4 +1,4 @@
-# UK River Levels app for splunk
+# UK River Levels app for Splunk
 
 This application uses the environment agency’s API to produce metrics on the UK river levels.
 
