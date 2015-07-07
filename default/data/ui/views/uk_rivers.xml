@@ -4,15 +4,18 @@
     <panel>
       <table>
         <search>
-          <query>sourcetype=riverlevels parameterName="Water Level" 	 [search sourcetype=riverlevels  parameterName="Water Level" 	 | streamstats last(value) as previous by notation current=f global=f window=1 | table previous value _time station notation| eval diff=previous-value| where diff &gt; 1 OR diff &lt; -1 | stats count by station notation| return 100000 station] | stats sparkline(avg(value)) by label town notation</query>
+          <query>sourcetype=riverlevels  parameterName="Water Level" 	 | eval value=if(unit="mm",value/100,value) | stats sparkline(avg(value))  range(value) as range by town label notation station | sort - range</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
         <option name="wrap">true</option>
         <option name="rowNumbers">false</option>
         <option name="dataOverlayMode">none</option>
-        <option name="drilldown">cell</option>
+        <option name="drilldown">row</option>
         <option name="count">10</option>
+        <drilldown>
+          <link>river_levels?form.notation=$row.notation$&amp;form.town=$row.town$&amp;form.river=$row.station$</link>
+        </drilldown>
       </table>
     </panel>
   </row>
